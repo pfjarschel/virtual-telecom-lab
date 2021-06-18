@@ -11,7 +11,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from PyQt5 import uic
+from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
+from PyQt5 import uic, QtCore
 from PyQt5.QtCore import QTimer, QDir
 from PyQt5.QtWidgets import QFileDialog
 
@@ -109,6 +110,7 @@ class Oscilloscope(FormUI, WindowUI):
         self.figure = plt.figure()
         self.graph = FigureCanvas(self.figure)
         self.graphToolbar = NavigationToolbar(self.graph, self)
+        self.graphToolbar.locLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.graphHolder.addWidget(self.graphToolbar)
         self.graphHolder.addWidget(self.graph)
         self.graph_ax = self.figure.add_subplot()
@@ -123,10 +125,13 @@ class Oscilloscope(FormUI, WindowUI):
         self.graph_ax.set_ylim([self.mastervscale[0], self.mastervscale[1]])
         self.graph_ax.xaxis.set_ticks(np.linspace(self.timeoffs, self.timediv*10 + self.timeoffs, 11))
         self.graph_ax.yaxis.set_ticks(np.linspace(self.mastervscale[0], self.mastervscale[1], 11))
+        self.graph_ax.xaxis.set_minor_locator(AutoMinorLocator())
+        self.graph_ax.yaxis.set_minor_locator(AutoMinorLocator())
         self.graph_ax.set_xlabel("Time (s)")
         self.graph_ax.set_ylabel("Voltage (V)")
         self.graph_ax.set_yticklabels([])
-        self.graph_ax.grid(True)
+        self.graph_ax.grid(True, which='minor', color='gainsboro')
+        self.graph_ax.grid(True, which='major', color='gray')
         self.graph.draw()
 
     # Start/stop Acquisition
