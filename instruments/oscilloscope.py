@@ -152,8 +152,13 @@ class Oscilloscope(FormUI, WindowUI):
         self.y_axis = np.zeros([4, self.npoints])
         self.avg_buffer = np.zeros([4, self.avgSpin.value(), self.npoints])
         self.hold_buffer = np.zeros([4, self.holdSpin.value(), self.npoints])
-        self.avg_counter = 0
-        self.hold_counter = 0
+        self.avg_counter = [0, 0, 0, 0]
+        self.hold_counter = [0, 0, 0, 0]
+
+        # Get rid of empty average buffer
+        for i in range(0, 4):
+            data = self.input_channels(i)
+            self.avg_buffer[i] = np.tile(data, (self.avgSpin.value(), 1))
         
         if was_running:
             self.runAcquisition()
@@ -245,12 +250,10 @@ class Oscilloscope(FormUI, WindowUI):
             # Set soft lock
             self.busy = True
             
-            # Create arrays
+            # Create x array
             self.x_axis = np.linspace(self.timeoffs, self.timeoffs + self.sampletime, self.npoints)  
-            if self.holdCheck.isChecked():
-                self.x_axis = np.tile(self.x_axis, self.hold_counter + 1)
-                self.y_axis = np.zeros([4, self.npoints*(self.hold_counter + 1)])
-
+            
+            # Sweep channels
             for i in range(0, len(self.input_objs)):
                 if self.channelsChecks[i].isChecked() and self.input_objs[i]:
                     # Adjust phase to simulate trigger (and time offset)
@@ -266,17 +269,26 @@ class Oscilloscope(FormUI, WindowUI):
 
                     # If hold is enabled, hold data
                     if self.holdCheck.isChecked():
+                        self.x_axis = np.tile(self.x_axis, self.hold_counter[i] + 1)
+                        self.y_axis = np.zeros([4, self.npoints*(self.hold_counter[i] + 1)])
                         self.hold_buffer[i] = np.concatenate(([new_data], self.hold_buffer[i][0:-1]))
-                        self.y_axis[i] = np.concatenate(self.hold_buffer[i][0:self.hold_counter + 1])
+                        self.y_axis[i] = np.concatenate(self.hold_buffer[i][0:self.hold_counter[i] + 1])
                     # If not, perform averaging
                     elif self.avgSpin.value() > 1:
                         self.avg_buffer[i] = np.concatenate(([new_data], self.avg_buffer[i][0:-1]))
-                        self.y_axis[i] = self.avg_buffer[i][0:self.avg_counter + 1].mean(axis=0)
-                        self.avg_counter += 1
-                        if self.avg_counter >= self.avgSpin.value():
-                            self.avg_counter = self.avgSpin.value() - 1
+                        self.y_axis[i] = self.avg_buffer[i][0:self.avg_counter[i] + 1].mean(axis=0)
                     else:
                         self.y_axis[i] = new_data
+
+                    # Update counters
+                    if self.holdCheck.isChecked():
+                        self.hold_counter[i] += 1
+                        if self.hold_counter[i] >= self.holdSpin.value():
+                            self.hold_counter[i] = self.holdSpin.value() - 1
+                    elif self.avgSpin.value() > 1:
+                        self.avg_counter[i] += 1
+                        if self.avg_counter[i] >= self.avgSpin.value():
+                            self.avg_counter[i] = self.avgSpin.value() - 1
                 
                     # Update plot
                     self.graph_lines[i].set_ydata((self.y_axis[i] + self.voffsets[i])/self.voltdivs[i])
@@ -290,16 +302,6 @@ class Oscilloscope(FormUI, WindowUI):
             self.graph_ax.yaxis.set_ticks(np.linspace(self.mastervscale[0], self.mastervscale[1], 11))
             self.graph.draw()
             self.graph.flush_events()
-
-            # Update counters
-            if self.holdCheck.isChecked():
-                self.hold_counter += 1
-                if self.hold_counter >= self.holdSpin.value():
-                    self.hold_counter = self.holdSpin.value() - 1
-            elif self.avgSpin.value() > 1:
-                self.avg_counter += 1
-                if self.avg_counter >= self.avgSpin.value():
-                    self.avg_counter = self.avgSpin.value() - 1
             
             # Release soft lock
             self.busy = False
