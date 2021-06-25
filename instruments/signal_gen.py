@@ -7,7 +7,6 @@
 # Imports
 import os, time
 import numpy as np
-from statsmodels.nonparametric.smoothers_lowess import lowess
 from PyQt5 import uic
 
 # File paths
@@ -57,6 +56,7 @@ class SignalGenerator(FormUI, WindowUI):
     jitter = 20e-12
     phase = 0.0
     output_enabled = False
+    timemult = 1.0
 
     # Dependent limits
     min_pulsewidth = risetime + falltime
@@ -74,7 +74,7 @@ class SignalGenerator(FormUI, WindowUI):
         print("Initializing signal generator")
         self.t0 = time.time()  # Will be the phase of the output wave
         self.refresh_params()  # Recalculate some parameters
-        
+
         self.setupUi(self)
         self.setupOtherUi()
         self.setupActions()
@@ -234,9 +234,14 @@ class SignalGenerator(FormUI, WindowUI):
                 wf = self.amplitude*(multiplier_array - 0.5)
             
         # Filter (simulate risetime)
-        filt_wl = min(max(1.0*(self.risetime/self.sampletime), 0.0), 1.0)
-        wf = lowess(wf, self.exttimearray, frac=filt_wl, it=0)[:, 1][self.addpoints:-self.addpoints]
+        filt_wl = min(max(int(self.risetime/self.delta), 3), self.totnpoints)
+        if not (filt_wl % 2): filt_wl -= 1
+        w = np.blackman(filt_wl)
+        wf = np.convolve(wf, w, 'same')/np.sum(w)
         
+        # Get only the numper of points wanted
+        wf = wf[self.addpoints:-self.addpoints]
+
         # Add some noise
         noise = np.random.uniform(-self.noiselevel/2, self.noiselevel/2, size=self.npoints)
         wf = wf + noise + self.offset
@@ -253,10 +258,12 @@ class SignalGenerator(FormUI, WindowUI):
         self.delta = self.sampletime/self.npoints  # Time step
         
         # Points to add (will be cut off later, increases filter precision)
+        self.npoints = int(self.npoints*self.timemult)
         self.addpoints = int(self.npoints*0.1)
         self.totnpoints = self.npoints + 2*self.addpoints
 
         # Added time due to the added points
+        self.sampletime = self.sampletime*self.timemult
         self.addtime = self.delta*self.addpoints
         self.tottime = self.sampletime + self.addtime
 
@@ -275,18 +282,20 @@ class SignalGenerator(FormUI, WindowUI):
     # Total time of the output wave
     def input_sampletime(self):
         if self.input_sampletime_obj:
-            self.sampletime = self.input_sampletime_obj.output_sampletime()
+            sampletime = self.input_sampletime_obj.output_sampletime()
         else:
-            self.sampletime = self.sampletime
-        self.refresh_params()
+            sampletime = self.sampletime
+        if self.sampletime != sampletime:
+            self.sampletime = sampletime
 
     # Number of points of the output wave
     def input_npoints(self):
         if self.input_npoints_obj:
-            self.npoints = self.input_npoints_obj.output_npoints()
+            npoints = self.input_npoints_obj.output_npoints()
         else:
-            self.npoints = self.npoints 
-        self.refresh_params()  
+            npoints = self.npoints
+        if npoints != self.npoints:
+            self.npoints = npoints
 
     # Output functions: all instrument outputs are processed here. These are passive (called from other instruments)
     # Output signal: The instrument oputput (a time-dependent signal)   
@@ -294,9 +303,18 @@ class SignalGenerator(FormUI, WindowUI):
         # Get sampletime and npoints
         self.input_sampletime()
         self.input_npoints()
+        self.refresh_params()
         self.wf = np.zeros([self.npoints])
 
         # Get data
         self.get_waveform()
 
         return self.wf
+
+    # Output time array: outputs the instrument time array on which the signal is based
+    def output_timearray(self):
+        return self.timearray
+
+    # Output frequency: outputs the signal frequency
+    def output_freq(self):
+        return self.freq

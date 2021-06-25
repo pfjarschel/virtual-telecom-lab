@@ -180,7 +180,7 @@ class Oscilloscope(FormUI, WindowUI):
         self.voffsets[3] = self.ch4offsSpin.value()
         
         # Adjust dials positions
-        self.hoffsetDial.setValue(self.hoffsetSpin.value()*10)
+        self.hoffsetDial.setValue(self.hoffsetSpin.value()*10.0)
         self.ch1offsDial.setValue(self.ch1offsSpin.value()*10.0)
         self.ch2offsDial.setValue(self.ch2offsSpin.value()*10.0)
         self.ch3offsDial.setValue(self.ch3offsSpin.value()*10.0)
