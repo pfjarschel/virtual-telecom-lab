@@ -82,6 +82,7 @@ class Oscilloscope(FormUI, WindowUI):
         self.stopBut.clicked.connect(self.stopAcquisition)
         self.saveBut.clicked.connect(self.saveData)
         self.holdCheck.clicked.connect(self.setAcquisition)
+        self.showvdivCheck.clicked.connect(self.change_vdivs)
         self.hoffsetSpin.valueChanged.connect(self.setScales)
         self.pointsSpin.valueChanged.connect(self.setAcquisition)
         self.avgSpin.valueChanged.connect(self.setAcquisition)
@@ -128,11 +129,18 @@ class Oscilloscope(FormUI, WindowUI):
         self.graph_ax.xaxis.set_minor_locator(AutoMinorLocator())
         self.graph_ax.yaxis.set_minor_locator(AutoMinorLocator())
         self.graph_ax.set_xlabel("Time (s)")
-        self.graph_ax.set_ylabel("Voltage (V)")
-        self.graph_ax.set_yticklabels([])
+        self.graph_ax.set_ylabel("Voltage (Div)")
+        if not self.showvdivCheck.isChecked():
+            self.graph_ax.set_yticklabels([])
         self.graph_ax.grid(True, which='minor', color='gainsboro')
         self.graph_ax.grid(True, which='major', color='gray')
         self.graph.draw()
+
+    def change_vdivs(self):
+        if self.showvdivCheck.isChecked():
+            self.graph_ax.set_yticklabels(np.linspace(-5, 5, 11))
+        else:
+            self.graph_ax.set_yticklabels([])
 
     # Start/stop Acquisition
     def runAcquisition(self):

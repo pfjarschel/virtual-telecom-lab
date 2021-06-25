@@ -69,6 +69,7 @@ class Filter():
         self.input_waveform_obj.timemult = timemult
         extra_time_phase = 2*np.pi*self.freq*((timemult - 1)*self.input_waveform_obj.sampletime/2)
         phase = np.arctan(self.freq/self.cutoff) + extra_time_phase
+        # print((phase - extra_time_phase)*180/np.pi)
         self.input_waveform_obj.phase -= phase
         self.input_waveform_obj.refresh_params()
         npoints1 = self.input_waveform_obj.npoints
