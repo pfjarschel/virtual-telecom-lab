@@ -142,6 +142,11 @@ class Oscilloscope(FormUI, WindowUI):
         else:
             self.graph_ax.set_yticklabels([])
 
+        # self.graphHolder.removeWidget(self.graphToolbar)
+        # self.graphToolbar = NavigationToolbar(self.graph, self)
+        # self.graphToolbar.locLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        # self.graphHolder.addWidget(self.graphToolbar)
+
     # Start/stop Acquisition
     def runAcquisition(self):
         if not self.running:
