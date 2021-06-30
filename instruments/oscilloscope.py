@@ -53,6 +53,8 @@ class Oscilloscope(FormUI, WindowUI):
     hold_buffer = np.zeros([4, 2, npoints])
     avg_counter = 0
     hold_counter = 0
+    xymode = False
+    xy_x = 1
     
     
     # Default functions
@@ -75,6 +77,7 @@ class Oscilloscope(FormUI, WindowUI):
     def setupOtherUi(self):
         self.setup_graph()
         self.channelsChecks = [self.ch1Check, self.ch2Check, self.ch3Check, self.ch4Check]
+        self.xyChecks = [self.ch1XCheck, self.ch2XCheck, self.ch3XCheck, self.ch4XCheck]
 
     def setupActions(self):
         # Connect UI signals to functions
@@ -82,7 +85,10 @@ class Oscilloscope(FormUI, WindowUI):
         self.stopBut.clicked.connect(self.stopAcquisition)
         self.saveBut.clicked.connect(self.saveData)
         self.holdCheck.clicked.connect(self.setAcquisition)
-        self.showvdivCheck.clicked.connect(self.change_vdivs)
+        self.ch1XCheck.clicked.connect(self.change_xy)
+        self.ch2XCheck.clicked.connect(self.change_xy)
+        self.ch3XCheck.clicked.connect(self.change_xy)
+        self.ch4XCheck.clicked.connect(self.change_xy)
         self.hoffsetSpin.valueChanged.connect(self.setScales)
         self.pointsSpin.valueChanged.connect(self.setAcquisition)
         self.avgSpin.valueChanged.connect(self.setAcquisition)
@@ -130,12 +136,11 @@ class Oscilloscope(FormUI, WindowUI):
         self.graph_ax.yaxis.set_minor_locator(AutoMinorLocator())
         self.graph_ax.set_xlabel("Time (s)")
         self.graph_ax.set_ylabel("Voltage (Div)")
-        if not self.showvdivCheck.isChecked():
-            self.graph_ax.set_yticklabels([])
         self.graph_ax.grid(True, which='minor', color='gainsboro')
         self.graph_ax.grid(True, which='major', color='gray')
         self.graph.draw()
 
+    # Enable/disable vertical numbers in graph TODO: show coordinates
     def change_vdivs(self):
         if self.showvdivCheck.isChecked():
             self.graph_ax.set_yticklabels(np.linspace(-5, 5, 11))
@@ -146,6 +151,22 @@ class Oscilloscope(FormUI, WindowUI):
         # self.graphToolbar = NavigationToolbar(self.graph, self)
         # self.graphToolbar.locLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         # self.graphHolder.addWidget(self.graphToolbar)
+
+    # Change XY mode
+    def change_xy(self):
+        ch = int(self.sender().objectName()[2])
+        enable = self.sender().isChecked()
+        self.ch1XCheck.setChecked(False)
+        self.ch2XCheck.setChecked(False)
+        self.ch3XCheck.setChecked(False)
+        self.ch4XCheck.setChecked(False)
+        self.sender().setChecked(enable)
+        self.xymode = enable
+        self.xy_x = ch
+        if enable:
+            self.channelsChecks[ch - 1].setChecked(True)
+
+        self.setAcquisition()
 
     # Start/stop Acquisition
     def runAcquisition(self):
@@ -305,11 +326,30 @@ class Oscilloscope(FormUI, WindowUI):
                     self.graph_lines[i].set_visible(True)
                 else:
                     self.graph_lines[i].set_visible(False)
-            
+
             self.graph_ax.set_xlim([self.timeoffs, self.timediv*10 + self.timeoffs])
             self.graph_ax.set_ylim([self.mastervscale[0], self.mastervscale[1]])
             self.graph_ax.xaxis.set_ticks(np.linspace(self.timeoffs, self.timediv*10 + self.timeoffs, 11))
             self.graph_ax.yaxis.set_ticks(np.linspace(self.mastervscale[0], self.mastervscale[1], 11))
+            self.graph_ax.set_xlabel("Time (s)")
+            self.graph_ax.set_ylabel("Voltage (Div)")
+
+            # After getting all data, change plots to XY mode if enabled
+            ch = self.xy_x - 1
+            if self.xymode and self.channelsChecks[ch].isChecked() and self.input_objs[ch]:
+                for i in range(0, len(self.input_objs)):
+                    if self.channelsChecks[i].isChecked() and self.input_objs[i] and i != ch:
+                        new_x = (self.y_axis[ch] + self.voffsets[ch])/self.voltdivs[ch]
+                        self.graph_lines[i].set_xdata(new_x)
+                        self.graph_lines[i].set_visible(True)
+                        self.graph_ax.set_xlim([self.mastervscale[0], self.mastervscale[1]])
+                        self.graph_ax.xaxis.set_ticks(np.linspace(self.mastervscale[0], self.mastervscale[1], 11))
+                    elif self.channelsChecks[i].isChecked() and self.input_objs[i] and i == ch:
+                        self.graph_lines[i].set_visible(False)
+                
+                self.graph_ax.set_xlabel(f"CH{ch + 1} Voltage (Div)")
+                self.graph_ax.set_ylabel("Voltage (Div)")
+            
             self.graph.draw()
             self.graph.flush_events()
 
@@ -370,7 +410,9 @@ class Oscilloscope(FormUI, WindowUI):
     def input_channels(self, channel):
         if self.input_objs[channel] and self.channelsChecks[channel].isChecked():
             data = self.input_objs[channel].output_signal()
-            return data
+        else:
+            data = np.zeros([self.npoints])
+        return data
 
     # Output functions: all instrument outputs are processed here. These are passive (called from other instruments)
     # Output sample time 

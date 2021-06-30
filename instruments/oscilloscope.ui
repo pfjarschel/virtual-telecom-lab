@@ -411,6 +411,9 @@
          <property name="text">
           <string>Show vertical numbers (divisions, NOT Volts)</string>
          </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item>
@@ -640,6 +643,13 @@
             </property>
             <property name="text">
              <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="ch4XCheck">
+            <property name="text">
+             <string>As X</string>
             </property>
            </widget>
           </item>
@@ -970,6 +980,13 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="ch3XCheck">
+            <property name="text">
+             <string>As X</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="verticalSpacer_6">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -1188,6 +1205,13 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="ch1XCheck">
+            <property name="text">
+             <string>As X</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="verticalSpacer_2">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -1240,6 +1264,13 @@
             </property>
             <property name="text">
              <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="ch2XCheck">
+            <property name="text">
+             <string>As X</string>
             </property>
            </widget>
           </item>
