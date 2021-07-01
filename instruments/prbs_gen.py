@@ -33,7 +33,7 @@ class PRBSGenerator(FormUI, WindowUI):
     input_npoints_obj = None
 
     # Independent limits
-    max_freq = 10e9
+    max_freq = 50e9
     min_freq= 100e3
     max_amplitude = 1e2
     min_amplitude = 1e-3
@@ -41,7 +41,7 @@ class PRBSGenerator(FormUI, WindowUI):
     min_offset = -1e2
 
     # Internal parameters
-    risetime = 0.4*(1/max_freq)
+    risetime = 0.4*(5/max_freq)
     falltime = risetime
     noiselevel = 5*min_amplitude
     jitter = 20e-12
@@ -87,9 +87,12 @@ class PRBSGenerator(FormUI, WindowUI):
         self.fmultSpin.valueChanged.connect(self.setParameters)
         self.amultSpin.valueChanged.connect(self.setParameters)
         self.offsetSpin.valueChanged.connect(self.setParameters)
+        self.phaseSpin.valueChanged.connect(self.setParameters)
+        self.levelsSpin.valueChanged.connect(self.setBitLevels)
         self.fmultDial.valueChanged.connect(self.syncDialsSpins)
         self.amultDial.valueChanged.connect(self.syncDialsSpins)
         self.offsetSlider.valueChanged.connect(self.syncDialsSpins)
+        self.phaseSlider.valueChanged.connect(self.syncDialsSpins)
         
 
     def toggleOutput(self):
@@ -105,6 +108,7 @@ class PRBSGenerator(FormUI, WindowUI):
         self.fmultSpin.setValue(self.fmultDial.value()/100.0)
         self.amultSpin.setValue(self.amultDial.value()/10.0)
         self.offsetSpin.setValue(self.offsetSlider.value()/10.0)
+        self.phaseSpin.setValue(self.phaseSlider.value()/10.0)
 
     def setParameters(self):
         # Set Frequency
@@ -138,17 +142,25 @@ class PRBSGenerator(FormUI, WindowUI):
         # Recalculate some stuff
         self.refresh_params()
 
+        # Set phase
+        self.phase = self.phaseSpin.value()*np.pi/180.0
+
         # Adjust dials/sliders positions and limited values
         self.fmultDial.setValue(self.fmultSpin.value()*100.0)
         self.amultDial.setValue(self.amultSpin.value()*10.0)
         self.offsetSlider.setValue(self.offsetSpin.value()*10.0)
+        self.phaseSlider.setValue(self.phaseSpin.value()*10.0)
+
+    def setBitLevels(self):
+        if self.levelsSpin.value() % 2 and False:  # Disable even number of bits for now
+            self.levelsSpin.setValue(self.levelsSpin.value() + 1)
 
 
     # Internal functions    
     # Create full waveform
     def get_waveform(self):
         wf = np.zeros([self.totnpoints])
-        phase = self.t0 % (2*np.pi)
+        phase = self.t0 % (2*np.pi) + self.phase
 
         # Add some jitter
         jitter = np.random.uniform(-self.jitter/2, self.jitter/2)
@@ -156,12 +168,12 @@ class PRBSGenerator(FormUI, WindowUI):
 
         # Create bits
         multiplier_array = np.zeros([self.totnpoints])
-        bit = int(np.round(np.random.random()))
+        bit = np.random.randint(0, self.levelsSpin.value())/(self.levelsSpin.value() - 1)
         bit_n = np.floor(argument[0]/(2*np.pi))
         for i in range(self.totnpoints):
             if np.floor(argument[i]/(2*np.pi)) > bit_n:
                 bit_n = np.floor(argument[i]/(2*np.pi))
-                bit = int(np.round(np.random.random()))
+                bit = np.random.randint(0, self.levelsSpin.value())/(self.levelsSpin.value() - 1)
             multiplier_array[i] = bit
         wf = self.amplitude*(multiplier_array - 0.5)
             
