@@ -162,7 +162,7 @@ class QAMGenerator(FormUI, WindowUI):
         self.phaseqSlider.setValue(self.phaseqSpin.value()*10.0)
 
     def setBitLevels(self):
-        if self.levelsSpin.value() % 2 and False:  # Disable even number of bits for now
+        if self.levelsSpin.value() % 2:
             self.levelsSpin.setValue(self.levelsSpin.value() + 1)
 
 
@@ -189,7 +189,7 @@ class QAMGenerator(FormUI, WindowUI):
         sig1 = np.cos(ph_radians)
         sig2 = np.sin(ph_radians)
 
-        nlevels = 2*self.levelsSpin.value()
+        nlevels = self.levelsSpin.value()
         amps = np.arange(-(nlevels - 1), nlevels, 2)/max(nlevels - 1, 1)
         amp1 = amps[np.random.randint(1, nlevels + 1, int(num_symbols)) - 1]
         amp2 = amps[np.random.randint(1, nlevels + 1, int(num_symbols)) - 1]
