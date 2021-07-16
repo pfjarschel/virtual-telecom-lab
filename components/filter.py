@@ -65,6 +65,9 @@ class Filter():
         self.freq = self.input_freq()
 
         # Temporarily change generator phase, and time multiplier
+        self.input_waveform_obj.input_sampletime()
+        self.input_waveform_obj.input_npoints()
+        self.input_waveform_obj.refresh_params()
         timemult = 3.0
         self.input_waveform_obj.timemult = timemult
         extra_time_phase = 2*np.pi*self.freq*((timemult - 1)*self.input_waveform_obj.sampletime/2)
@@ -72,11 +75,11 @@ class Filter():
         # print((phase - extra_time_phase)*180/np.pi)
         self.input_waveform_obj.phase -= phase
         self.input_waveform_obj.refresh_params()
-        npoints1 = self.input_waveform_obj.npoints
-
+        
         # Get waveform, and time array
         wf = self.input_waveform()
         timearray = self.input_time()
+        npoints1 = self.input_waveform_obj.npoints
 
         # Reset generator phase and time multiplier
         self.input_waveform_obj.phase += phase
@@ -94,6 +97,7 @@ class Filter():
         # Take the correct slice from the waveform
         npoints0 = self.input_waveform_obj.npoints
         addedpoints = int((npoints1 - npoints0)/2)
+        print(len(wf), npoints1, npoints0, addedpoints)
         wf = wf[addedpoints:-addedpoints]
         
         return wf
