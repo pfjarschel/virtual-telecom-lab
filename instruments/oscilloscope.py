@@ -140,7 +140,7 @@ class Oscilloscope(FormUI, WindowUI):
         self.graph_ax.grid(True, which='major', color='gray')
         self.graph.draw()
 
-    # Enable/disable vertical numbers in graph TODO: show coordinates
+    # Enable/disable vertical numbers in graph
     def change_vdivs(self):
         if self.showvdivCheck.isChecked():
             self.graph_ax.set_yticklabels(np.linspace(-5, 5, 11))

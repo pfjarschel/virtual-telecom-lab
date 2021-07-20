@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>909</width>
-    <height>494</height>
+    <width>926</width>
+    <height>511</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -421,21 +421,35 @@
           <property name="verticalSpacing">
            <number>6</number>
           </property>
-          <item row="3" column="0">
-           <widget class="QCheckBox" name="peakCheck">
-            <property name="maximumSize">
-             <size>
-              <width>128</width>
-              <height>16777215</height>
-             </size>
+          <item row="3" column="2">
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <property name="spacing">
+             <number>0</number>
             </property>
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <property name="text">
-             <string>Peak detection</string>
-            </property>
-           </widget>
+            <item>
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Spectrogram N</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="sgNSpin">
+              <property name="keyboardTracking">
+               <bool>false</bool>
+              </property>
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>1024</number>
+              </property>
+              <property name="value">
+               <number>32</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item row="1" column="2">
            <layout class="QVBoxLayout" name="verticalLayout">
@@ -453,7 +467,11 @@
              </widget>
             </item>
             <item>
-             <widget class="QDoubleSpinBox" name="windowSpin"/>
+             <widget class="QDoubleSpinBox" name="windowSpin">
+              <property name="keyboardTracking">
+               <bool>false</bool>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -499,43 +517,28 @@
             </item>
            </layout>
           </item>
-          <item row="0" column="0">
-           <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item row="3" column="0">
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <property name="spacing">
+             <number>0</number>
+            </property>
             <item>
-             <widget class="QLabel" name="label_5">
-              <property name="maximumSize">
-               <size>
-                <width>128</width>
-                <height>16777215</height>
-               </size>
-              </property>
+             <widget class="QLabel" name="label_9">
               <property name="text">
-               <string>RBW (MHz)</string>
+               <string>Sample Rate Turbo</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QDoubleSpinBox" name="rbwSpin">
-              <property name="maximumSize">
-               <size>
-                <width>128</width>
-                <height>16777215</height>
-               </size>
-              </property>
+             <widget class="QDoubleSpinBox" name="srturboSpin">
               <property name="keyboardTracking">
                <bool>false</bool>
               </property>
-              <property name="decimals">
-               <number>4</number>
-              </property>
               <property name="minimum">
-               <double>0.000100000000000</double>
+               <double>1.000000000000000</double>
               </property>
               <property name="maximum">
-               <double>2000.000000000000000</double>
-              </property>
-              <property name="value">
-               <double>0.010000000000000</double>
+               <double>100.000000000000000</double>
               </property>
              </widget>
             </item>
@@ -543,6 +546,9 @@
           </item>
           <item row="0" column="2">
            <layout class="QVBoxLayout" name="verticalLayout_6">
+            <property name="spacing">
+             <number>0</number>
+            </property>
             <property name="sizeConstraint">
              <enum>QLayout::SetDefaultConstraint</enum>
             </property>
@@ -583,6 +589,74 @@
             </item>
            </layout>
           </item>
+          <item row="0" column="0">
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="maximumSize">
+               <size>
+                <width>128</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>RBW (MHz)</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="rbwSpin">
+              <property name="maximumSize">
+               <size>
+                <width>128</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="keyboardTracking">
+               <bool>false</bool>
+              </property>
+              <property name="decimals">
+               <number>4</number>
+              </property>
+              <property name="minimum">
+               <double>0.000100000000000</double>
+              </property>
+              <property name="maximum">
+               <double>2000.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>0.010000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="peakCheck">
+            <property name="maximumSize">
+             <size>
+              <width>128</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="layoutDirection">
+             <enum>Qt::LeftToRight</enum>
+            </property>
+            <property name="text">
+             <string>Peak detection</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QCheckBox" name="syncCheck">
+            <property name="text">
+             <string>Sync start</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -615,11 +689,48 @@
       </layout>
      </item>
      <item>
-      <layout class="QGridLayout" name="graphHolder">
-       <property name="sizeConstraint">
-        <enum>QLayout::SetMaximumSize</enum>
+      <widget class="QTabWidget" name="tabWidget">
+       <property name="currentIndex">
+        <number>0</number>
        </property>
-      </layout>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="elideMode">
+        <enum>Qt::ElideNone</enum>
+       </property>
+       <widget class="QWidget" name="normal">
+        <attribute name="title">
+         <string>Normal</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout_5">
+         <item row="0" column="0">
+          <layout class="QGridLayout" name="graphHolder">
+           <property name="sizeConstraint">
+            <enum>QLayout::SetMaximumSize</enum>
+           </property>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="spectrogram">
+        <attribute name="title">
+         <string>Spectrogram</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout_6">
+         <item row="0" column="0">
+          <layout class="QGridLayout" name="sggraphHolder">
+           <property name="sizeConstraint">
+            <enum>QLayout::SetMaximumSize</enum>
+           </property>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </widget>
      </item>
     </layout>
    </item>

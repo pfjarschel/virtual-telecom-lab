@@ -43,6 +43,8 @@ class ESA(FormUI, WindowUI):
     peakdet = False
     windowfilt = False
     window_beta = 0.0
+    npoints_inc = 1
+    sync_start = False
     
     # Input objects
     input_objs = [None]  
@@ -55,9 +57,15 @@ class ESA(FormUI, WindowUI):
     sampletime = 1/rbw
     x_axis = np.linspace(fstart, fstop, npoints)
     y_axis = np.zeros([npoints])
+    sg_x = []
+    sg_y = np.linspace(fstart, fstop, npoints)
+    sg_z = np.zeros([1, npoints])
     avg_buffer = np.zeros([2, npoints])
     peak_buffer = np.zeros([npoints])
+    sg_buffer = np.zeros([1, npoints])
     avg_counter = 0
+    sg_counter = 0
+    sg_t0 = time.time()
     
     
     # Default functions
@@ -78,6 +86,8 @@ class ESA(FormUI, WindowUI):
 
     # UI functions
     def setupOtherUi(self):
+        self.sgn = self.sgNSpin.value()
+        self.sg_buffer = np.ones([self.sgn, self.npoints])
         self.setup_graph()
 
     def setupActions(self):
@@ -100,6 +110,10 @@ class ESA(FormUI, WindowUI):
         self.reflevelSpin.valueChanged.connect(self.setAcquisition)
         self.linRadio.clicked.connect(self.setAcquisition)
         self.dbmRadio.clicked.connect(self.setAcquisition)
+        self.sgNSpin.valueChanged.connect(self.setAcquisition)
+        self.tabWidget.currentChanged.connect(self.setAcquisition)
+        self.srturboSpin.valueChanged.connect(self.setAcquisition)
+        self.syncCheck.clicked.connect(self.setAcquisition)
         
         # Timers
         self.loop_timer = QTimer()
@@ -107,6 +121,7 @@ class ESA(FormUI, WindowUI):
         self.loop_timer.setInterval(10)
         
     def setup_graph(self):
+        # Main
         self.figure = plt.figure()
         self.graph = FigureCanvas(self.figure)
         self.graphToolbar = NavigationToolbar(self.graph, self)
@@ -139,6 +154,20 @@ class ESA(FormUI, WindowUI):
         self.graph_ax.grid(True, which='major', color='gray')
         self.graph.draw()
 
+        # Spectrogram
+        self.sgfigure = plt.figure()
+        self.sggraph = FigureCanvas(self.sgfigure)
+        self.sggraphToolbar = NavigationToolbar(self.sggraph, self)
+        self.sggraphToolbar.locLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        self.sggraphHolder.addWidget(self.sggraphToolbar)
+        self.sggraphHolder.addWidget(self.sggraph)
+        self.sggraph_ax = self.sgfigure.add_subplot()
+        
+        self.sggraph_ax.set_xlabel("Time (s)")
+        self.sggraph_ax.set_ylabel("Frequency (MHz)")
+        
+        self.sggraph.draw()
+
     # Start/stop Acquisition
     def runAcquisition(self):
         if not self.running:
@@ -170,6 +199,8 @@ class ESA(FormUI, WindowUI):
             self.peakdet = self.peakCheck.isChecked()
             self.windowfilt = self.windowCheck.isChecked()
             self.window_beta = self.windowSpin.value()
+            self.npoints_inc = self.srturboSpin.value()
+            self.sync_start = self.syncCheck.isChecked()
             
             changed_f = False
             if sname == "startSpin" or sname == "stopSpin":
@@ -211,11 +242,17 @@ class ESA(FormUI, WindowUI):
                 self.pointsSpin.setValue(self.npoints)
 
             self.sampletime = 1/self.rbw
+            self.sgn = self.sgNSpin.value()
             self.x_axis = np.linspace(self.fstart, self.fstop, self.npoints)
             self.y_axis = np.zeros([self.npoints])
             self.peak_buffer = np.zeros([self.npoints])
             self.avg_buffer = np.zeros([self.avgSpin.value(), self.npoints])
+            self.sg_buffer = 1e-30*np.ones([self.sgn, self.npoints])
+            self.sg_y = np.linspace(self.fstart, self.fstop, self.npoints)  
+            self.sg_x = np.zeros([self.sgn])
             self.avg_counter = 0
+            self.sg_counter = 0
+            self.sg_t0 = time.time()
 
             # Get rid of empty average buffer
             data = self.input_signal()
@@ -233,63 +270,102 @@ class ESA(FormUI, WindowUI):
         if not self.busy:
             # Set soft lock
             self.busy = True
-            
-            # Create arrays
-            self.x_axis = np.linspace(self.fstart, self.fstop, self.npoints)  
-            
-            # Get signal
-            if self.input_objs[0]:                    
-                # Get data
-                new_data = self.input_signal()
 
-                # If peak detect is enabled, hold maxima
-                if self.peakCheck.isChecked():
-                    mask = (new_data > self.peak_buffer)
-                    self.peak_buffer[mask] = new_data[mask]
-                    self.y_axis = self.peak_buffer
-                # If not, perform averaging
-                elif self.avgSpin.value() > 1:
-                    self.avg_buffer = np.concatenate(([new_data], self.avg_buffer[0:-1]))
-                    self.y_axis = self.avg_buffer[0:self.avg_counter + 1].mean(axis=0)
-                else:
-                    self.y_axis = new_data
+            if self.tabWidget.currentIndex() == 0:
+                # Create arrays
+                self.x_axis = np.linspace(self.fstart, self.fstop, self.npoints)  
+                
+                # Get signal
+                if self.input_objs[0]:                    
+                    # Get data
+                    new_data = self.input_signal()
+
+                    # If peak detect is enabled, hold maxima
+                    if self.peakCheck.isChecked():
+                        mask = (new_data > self.peak_buffer)
+                        self.peak_buffer[mask] = new_data[mask]
+                        self.y_axis = self.peak_buffer
+                    # If not, perform averaging
+                    elif self.avgSpin.value() > 1:
+                        self.avg_buffer = np.concatenate(([new_data], self.avg_buffer[0:-1]))
+                        self.y_axis = self.avg_buffer[0:self.avg_counter + 1].mean(axis=0)
+                    else:
+                        self.y_axis = new_data
+
+                    if self.dBm:
+                        self.y_axis = 20*np.log10(self.y_axis)
+                
+                    # Update plot
+                    self.graph_line.set_ydata(self.y_axis)
+                    self.graph_line.set_xdata(self.x_axis)
+                    self.graph_line.set_visible(True)
+
+                self.graph_ax.set_xlim([self.fstart, self.fstop])
+                self.graph_ax.xaxis.set_ticks(np.linspace(self.fstart, self.fstop, 11))
+                self.graph_ax.set_xlabel("Frequency (MHz)")
 
                 if self.dBm:
-                    self.y_axis = 20*np.log10(self.y_axis)
-            
-                # Update plot
-                self.graph_line.set_ydata(self.y_axis)
-                self.graph_line.set_xdata(self.x_axis)
-                self.graph_line.set_visible(True)
+                    self.graph_ax.set_autoscaley_on(False)
+                    self.graph_ax.set_autoscalex_on(False)
+                    ymin = (self.reflevel - 10*self.dbdiv)
+                    ymax = self.reflevel
+                    self.graph_ax.set_ylim([ymin, ymax])
+                    self.graph_ax.yaxis.set_ticks(np.linspace(ymin, ymax, 11))
+                    self.graph_ax.set_ylabel("Magnitude (dBm)")
+                else:
+                    self.graph_ax.set_autoscaley_on(True)
+                    self.graph_ax.set_autoscalex_on(False)
+                    self.graph_ax.relim()
+                    self.graph_ax.yaxis.set_major_locator(AutoLocator())
+                    self.graph_ax.autoscale_view()
+                    self.graph_ax.set_ylabel("Magnitude (V)")
+                
+                self.graph.draw()
+                self.graph.flush_events()
 
-            self.graph_ax.set_xlim([self.fstart, self.fstop])
-            self.graph_ax.xaxis.set_ticks(np.linspace(self.fstart, self.fstop, 11))
-            self.graph_ax.set_xlabel("Frequency (MHz)")
+                # Update counters
+                if self.avgSpin.value() > 1:
+                    self.avg_counter += 1
+                    if self.avg_counter >= self.avgSpin.value():
+                        self.avg_counter = self.avgSpin.value() - 1
+            else:                
+                # Get signal
+                if self.input_objs[0]:
+                    # Clear image
+                    self.sggraph_ax.clear()
 
-            if self.dBm:
-                self.graph_ax.set_autoscaley_on(False)
-                self.graph_ax.set_autoscalex_on(False)
-                ymin = (self.reflevel - 10*self.dbdiv)
-                ymax = self.reflevel
-                self.graph_ax.set_ylim([ymin, ymax])
-                self.graph_ax.yaxis.set_ticks(np.linspace(ymin, ymax, 11))
-                self.graph_ax.set_ylabel("Magnitude (dBm)")
-            else:
-                self.graph_ax.set_autoscaley_on(True)
-                self.graph_ax.set_autoscalex_on(False)
-                self.graph_ax.relim()
-                self.graph_ax.yaxis.set_major_locator(AutoLocator())
-                self.graph_ax.autoscale_view()
-                self.graph_ax.set_ylabel("Magnitude (V)")
-            
-            self.graph.draw()
-            self.graph.flush_events()
+                    # Get data
+                    new_data = np.abs(self.input_signal())
+                    if self.dBm:
+                        new_data = 20*np.log10(new_data)
 
-            # Update counters
-            if self.avgSpin.value() > 1:
-                self.avg_counter += 1
-                if self.avg_counter >= self.avgSpin.value():
-                    self.avg_counter = self.avgSpin.value() - 1
+                    # Join data
+                    if self.sg_counter < self.sgn:
+                        self.sg_buffer[self.sg_counter] = new_data
+                        t = time.time() - self.sg_t0
+                        dt = t/(self.sg_counter + 1)
+                        self.sg_x[self.sg_counter] = t
+                        self.sg_x[-1] = dt*self.sgn
+                    else:
+                        self.sg_buffer = np.roll(self.sg_buffer, -1, axis=0)
+                        self.sg_buffer[-1] = new_data
+                        self.sg_x = np.roll(self.sg_x, -1, axis=0)
+                        self.sg_x[-1] = time.time() - self.sg_t0
+
+                    # Update plot
+                    self.sggraph_ax.imshow(self.sg_buffer.T, aspect='auto', origin='lower',
+                                           extent=[self.sg_x[0], self.sg_x[-1], self.sg_y[0], self.sg_y[-1]])
+
+                self.sggraph_ax.set_xlabel("Time (s)")
+                self.sggraph_ax.set_ylabel("Frequency (MHz)")
+                
+                self.sggraph.draw()
+                self.sggraph.flush_events()
+
+                # Update counters
+                self.sg_counter += 1
+                if self.sg_counter > self.sgn:
+                    self.sg_counter = self.sgn - 1
 
             # Release soft lock
             self.busy = False
@@ -308,14 +384,30 @@ class ESA(FormUI, WindowUI):
                 filename = filename + ".txt"   
 
             with open(filename, "w") as file:
-                vertname = "Magnitude (V)"
-                if self.dBm:
-                    vertname = "Magnitude (dBm)"
-                file.write(f"Frequency (MHz)\t{vertname}\n")
-                for i in range(len(self.y_axis)):
-                    file.write(f"{self.x_axis[i]}\t")
-                    file.write(f"{self.y_axis[i]}")
+                if self.tabWidget.currentIndex() == 0:
+                    vertname = "Magnitude (V)"
+                    if self.dBm:
+                        vertname = "Magnitude (dBm)"
+                    file.write(f"Frequency (MHz)\t{vertname}\n")
+                    for i in range(len(self.y_axis)):
+                        file.write(f"{self.x_axis[i]}\t")
+                        file.write(f"{self.y_axis[i]}")
+                        file.write("\n")
+                else:
+                    vertname = "Mag. (V)"
+                    if self.dBm:
+                        vertname = "Mag. (dBm)"
+                    file.write(f"Frequency (MHz)\t")
+                    for j in range(0, len(self.sg_x)):
+                        file.write(f"{vertname} t={self.sg_x[j]:.02f}\t")
                     file.write("\n")
+                    for i in range(len(self.sg_buffer[0])):
+                        file.write(f"{self.sg_y[i]}\t")
+                        for j in range(0, len(self.sg_buffer)):
+                            file.write(f"{self.sg_buffer[j][i]}")
+                            if j < len(self.sg_buffer) - 1:
+                                file.write("\t")
+                        file.write("\n")
                 file.close()
 
         if was_running:
@@ -331,16 +423,23 @@ class ESA(FormUI, WindowUI):
     # Total time of the output wave
     def input_signal(self):
         if self.input_objs[0]:
+            # Sync
+            if self.sync_start:
+                self.input_objs[0].t0 = 0.0
+            else:
+                self.input_objs[0].t0 = self.input_objs[0].tref
+            
             data = 2*self.input_objs[0].output_signal()  # 2*: Consider Vpp
         else:
-            data = np.zeros([self.npoints])
+            data = np.zeros([int(self.npoints_inc*2*self.npoints)])
 
         N = int(2*self.fstop/self.rbw)
+        inc_N = int(N*self.npoints_inc)
         skip = N//2 - self.npoints
 
         yf = []
         if self.windowfilt:
-            w = windows.kaiser(N, self.window_beta)
+            w = windows.kaiser(inc_N, self.window_beta)
             if skip >= 0:  # This value can sometimes be < 0, leading to errors. If it happens, we just take some more points
                 yf = fft(data*w)[skip:N//2]
             else:
@@ -349,9 +448,9 @@ class ESA(FormUI, WindowUI):
             if skip >= 0:
                 yf = fft(data)[skip:N//2] 
             else:   
-                yf = fft(data)[:(N//2 - skip)] 
+                yf = fft(data)[:(N//2 - skip)]
 
-        return (2.0/N)*np.abs(yf)
+        return (2.0/inc_N)*np.abs(yf)
 
     # Output functions: all instrument outputs are processed here. These are passive (called from other instruments)
     # Output sample time 
@@ -360,4 +459,4 @@ class ESA(FormUI, WindowUI):
 
     # Output npoints
     def output_npoints(self):
-        return int(2*self.fstop/self.rbw)
+        return int(self.npoints_inc*2*self.fstop/self.rbw)

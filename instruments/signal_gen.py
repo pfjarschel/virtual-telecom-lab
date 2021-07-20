@@ -73,6 +73,7 @@ class SignalGenerator(FormUI, WindowUI):
         
         print("Initializing signal generator")
         self.t0 = time.time()  # Will be the phase of the output wave
+        self.tref = time.time()  # Initial time for chirp calc
         self.refresh_params()  # Recalculate some parameters
 
         self.setupUi(self)
@@ -213,7 +214,15 @@ class SignalGenerator(FormUI, WindowUI):
 
         # Add some jitter
         jitter = np.random.uniform(-self.jitter/2, self.jitter/2)
-        argument = 2*np.pi*self.freq*(self.exttimearray + jitter) + phase
+
+        # Chirped frequency
+        freq = self.freq
+        if self.chirpCheck.isChecked():
+            t = time.time() - self.tref
+            freq = self.freq*(1 + (self.chirpvarSpin.value()/100.0)*np.sin(2*np.pi*t/self.chirptSpin.value()))
+
+        # Calculate argument
+        argument = 2*np.pi*freq*(self.exttimearray + jitter) + phase
 
         if self.output_enabled:
             if self.wave == self.SINE:
@@ -224,10 +233,10 @@ class SignalGenerator(FormUI, WindowUI):
                 wf = 0.3183*self.amplitude*(np.arctan(np.sin(argument))
                         + np.arctan(1/np.sin(argument)))
             elif self.wave == self.SAW:
-                argument = 1*np.pi*self.freq*(self.exttimearray + jitter) + phase
+                argument = 1*np.pi*freq*(self.exttimearray + jitter) + phase
                 wf = -0.3183*self.amplitude*np.arctan(1/np.tan(argument))
             elif self.wave == self.RSAW:
-                argument = 1*np.pi*self.freq*(self.exttimearray + jitter) + phase
+                argument = 1*np.pi*freq*(self.exttimearray + jitter) + phase
                 wf = 0.3183*self.amplitude*np.arctan(1/np.tan(argument))
             elif self.wave == self.PULSE:
                 multiplier_array = np.where(argument % (2*np.pi) < self.dutycycle*2*np.pi, 1, 0)

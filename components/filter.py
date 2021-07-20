@@ -97,7 +97,6 @@ class Filter():
         # Take the correct slice from the waveform
         npoints0 = self.input_waveform_obj.npoints
         addedpoints = int((npoints1 - npoints0)/2)
-        print(len(wf), npoints1, npoints0, addedpoints)
         wf = wf[addedpoints:-addedpoints]
         
         return wf
