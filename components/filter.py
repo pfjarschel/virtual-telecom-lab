@@ -30,6 +30,7 @@ class Filter():
         print("Initializing filter")
         self.freq = 100e6
         self.t0 = time.time()  # Will be the phase of the output wave
+        self.tref = self.t0
 
     def __del__(self):
         print("Deleting filter object")
