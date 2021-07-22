@@ -58,6 +58,7 @@ class PRBSGenerator(FormUI, WindowUI):
         
         print("Initializing PRBS generator")
         self.t0 = time.time()  # Will be the phase of the output wave
+        self.tref = time.time()
         self.refresh_params()  # Recalculate some parameters
 
         self.setupUi(self)
