@@ -113,8 +113,8 @@ class QAMGenerator(FormUI, WindowUI):
     def syncDialsSpins(self):
         # Sync spin boxes values to dials and sliders values
         self.fmultSpin.setValue(self.fmultDial.value()/100.0)
-        self.amultSpin.setValue(self.amultDial.value()/10.0)
-        self.offsetSpin.setValue(self.offsetSlider.value()/10.0)
+        self.amultSpin.setValue(self.amultDial.value()/100.0)
+        self.offsetSpin.setValue(self.offsetSlider.value()/1000.0)
         self.phaseiSpin.setValue(self.phaseiSlider.value()/10.0)
         self.phaseqSpin.setValue(self.phaseqSlider.value()/10.0)
 
@@ -156,8 +156,8 @@ class QAMGenerator(FormUI, WindowUI):
 
         # Adjust dials/sliders positions and limited values
         self.fmultDial.setValue(self.fmultSpin.value()*100.0)
-        self.amultDial.setValue(self.amultSpin.value()*10.0)
-        self.offsetSlider.setValue(self.offsetSpin.value()*10.0)
+        self.amultDial.setValue(self.amultSpin.value()*100.0)
+        self.offsetSlider.setValue(self.offsetSpin.value()*1000.0)
         self.phaseiSlider.setValue(self.phaseiSpin.value()*10.0)
         self.phaseqSlider.setValue(self.phaseqSpin.value()*10.0)
 
@@ -197,8 +197,8 @@ class QAMGenerator(FormUI, WindowUI):
         extra_amp2 = amps[np.random.randint(1, nlevels + 1) - 1]
         amp1_array = np.concatenate([np.repeat(amp1, pts_per_symb), np.array(rem_points*[extra_amp1])])
         amp2_array = np.concatenate([np.repeat(amp2, pts_per_symb), np.array(rem_points*[extra_amp2])])
-        sig1 = sig1*amp1_array
-        sig2 = sig2*amp2_array
+        sig1 = sig1*amp1_array + self.offset
+        sig2 = sig2*amp2_array + self.offset
 
         sig = sig1 + 1j*sig2
 

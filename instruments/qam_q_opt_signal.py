@@ -15,7 +15,7 @@ thisfile = os.path.basename(__file__)
 
 
 # Main component class
-class QAMQSignal():
+class QAMQOSignal():
 
     # Input objects
     input_signal_obj = None
@@ -35,19 +35,13 @@ class QAMQSignal():
         self.freq = signal_obj.freq
 
     # Input functions: all parameters and instrument inputs are processed here. These are active (calls the output from other instruments)
-    # Waveform to filter
-    def input_signal(self):
-        wf = self.input_signal_obj.output_signal()
-        return np.imag(wf)
+    def input_opt_signal(self):
+        spec, wf = self.input_signal_obj.output_opt_signal()
+        return spec, np.imag(wf)
 
     # Output functions: all instrument outputs are processed here. These are passive (called from other instruments)
     # Output signal: The instrument oputput (a time-dependent signal)   
-    def output_signal(self):
+    def output_opt_signal(self):
         # Get signal
-        wf = self.input_signal()
-        
-        return wf
-
-    # Output time array: outputs the instrument time array on which the signal is based
-    def output_timearray(self):
-        return self.input_signal_obj.timearray
+        spec, wf = self.input_opt_signal()
+        return spec, wf

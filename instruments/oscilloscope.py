@@ -214,11 +214,11 @@ class Oscilloscope(FormUI, WindowUI):
         self.voffsets[3] = self.ch4offsSpin.value()
         
         # Adjust dials positions
-        self.hoffsetDial.setValue(self.hoffsetSpin.value()*10.0)
-        self.ch1offsDial.setValue(self.ch1offsSpin.value()*10.0)
-        self.ch2offsDial.setValue(self.ch2offsSpin.value()*10.0)
-        self.ch3offsDial.setValue(self.ch3offsSpin.value()*10.0)
-        self.ch4offsDial.setValue(self.ch4offsSpin.value()*10.0)
+        self.hoffsetDial.setValue(self.hoffsetSpin.value()*100.0)
+        self.ch1offsDial.setValue(self.ch1offsSpin.value()*1000.0)
+        self.ch2offsDial.setValue(self.ch2offsSpin.value()*1000.0)
+        self.ch3offsDial.setValue(self.ch3offsSpin.value()*1000.0)
+        self.ch4offsDial.setValue(self.ch4offsSpin.value()*1000.0)
     
     # Sync spin boxes values to dials and sliders values
     def syncDialsSpins(self):
@@ -229,7 +229,7 @@ class Oscilloscope(FormUI, WindowUI):
         self.timediv = hvalue*hmultiplier
         self.sampletime = 10*self.timediv
         self.hscaleInd.setText(f"{self.float2SI(self.timediv)}s")
-        self.hoffsetSpin.setValue(self.hoffsetDial.value()/10.0)
+        self.hoffsetSpin.setValue(self.hoffsetDial.value()/100.0)
         
         # Vertical
         vert_list = [1e-4, 2e-4, 5e-4]
@@ -239,7 +239,7 @@ class Oscilloscope(FormUI, WindowUI):
         vvalue = vert_list[int(self.ch1scaleDial.value() % 3)]
         vdiv = vvalue*vmultiplier
         self.ch1scaleInd.setText(f"{self.float2SI(vdiv)}V")
-        self.ch1offsSpin.setValue(self.ch1offsDial.value()/10.0)
+        self.ch1offsSpin.setValue(self.ch1offsDial.value()/1000.0)
         self.voltdivs[0] = vdiv
         
         # CH2
@@ -247,7 +247,7 @@ class Oscilloscope(FormUI, WindowUI):
         value = vert_list[int(self.ch2scaleDial.value() % 3)]
         vdiv = value*multiplier
         self.ch2scaleInd.setText(f"{self.float2SI(vdiv)}V")
-        self.ch2offsSpin.setValue(self.ch2offsDial.value()/10.0)
+        self.ch2offsSpin.setValue(self.ch2offsDial.value()/1000.0)
         self.voltdivs[1] = vdiv
         
         # CH3
@@ -255,7 +255,7 @@ class Oscilloscope(FormUI, WindowUI):
         value = vert_list[int(self.ch3scaleDial.value() % 3)]
         vdiv = value*multiplier
         self.ch3scaleInd.setText(f"{self.float2SI(vdiv)}V")
-        self.ch3offsSpin.setValue(self.ch3offsDial.value()/10.0)
+        self.ch3offsSpin.setValue(self.ch3offsDial.value()/1000.0)
         self.voltdivs[2] = vdiv
         
         # CH4
@@ -263,7 +263,7 @@ class Oscilloscope(FormUI, WindowUI):
         value = vert_list[int(self.ch4scaleDial.value() % 3)]
         vdiv = value*multiplier
         self.ch4scaleInd.setText(f"{self.float2SI(vdiv)}V")
-        self.ch4offsSpin.setValue(self.ch4offsDial.value()/10.0)
+        self.ch4offsSpin.setValue(self.ch4offsDial.value()/1000.0)
         self.voltdivs[3] = vdiv
         
         self.voltscales = self.voltdivs*10

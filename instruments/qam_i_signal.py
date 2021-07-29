@@ -47,3 +47,7 @@ class QAMISignal():
         wf = self.input_signal()
         
         return wf
+
+        # Output time array: outputs the instrument time array on which the signal is based
+    def output_timearray(self):
+        return self.input_signal_obj.timearray

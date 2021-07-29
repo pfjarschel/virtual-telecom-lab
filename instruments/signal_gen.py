@@ -133,10 +133,10 @@ class SignalGenerator(FormUI, WindowUI):
     def syncDialsSpins(self):
         # Sync spin boxes values to dials and sliders values
         self.fmultSpin.setValue(self.fmultDial.value()/100.0)
-        self.amultSpin.setValue(self.amultDial.value()/10.0)
-        self.offsetSpin.setValue(self.offsetSlider.value()/10.0)
-        self.dutySpin.setValue(self.dutySlider.value()/10.0)
-        self.phaseSpin.setValue(self.phaseSlider.value()/10.0)
+        self.amultSpin.setValue(self.amultDial.value()/100.0)
+        self.offsetSpin.setValue(self.offsetSlider.value()/1000.0)
+        self.dutySpin.setValue(self.dutySlider.value()/100.0)
+        self.phaseSpin.setValue(self.phaseSlider.value()/100.0)
 
     def setParameters(self):
         # Set Frequency
@@ -200,10 +200,10 @@ class SignalGenerator(FormUI, WindowUI):
 
         # Adjust dials/sliders positions and limited values
         self.fmultDial.setValue(self.fmultSpin.value()*100.0)
-        self.amultDial.setValue(self.amultSpin.value()*10.0)
-        self.offsetSlider.setValue(self.offsetSpin.value()*10.0)
-        self.dutySlider.setValue(self.dutySpin.value()*10.0)
-        self.phaseSlider.setValue(self.phaseSpin.value()*10.0)
+        self.amultDial.setValue(self.amultSpin.value()*100.0)
+        self.offsetSlider.setValue(self.offsetSpin.value()*1000.0)
+        self.dutySlider.setValue(self.dutySpin.value()*100.0)
+        self.phaseSlider.setValue(self.phaseSpin.value()*100.0)
 
 
     # Internal functions    
@@ -293,7 +293,10 @@ class SignalGenerator(FormUI, WindowUI):
         if self.input_sampletime_obj:
             sampletime = self.input_sampletime_obj.output_sampletime()
         else:
-            sampletime = self.sampletime
+            sampletime = 2.0/self.freq
+            self.t0 = 0.0
+            self.tref = 0.0
+            # self.tref = 0.0
         if self.sampletime != sampletime:
             self.sampletime = sampletime
 
@@ -302,7 +305,7 @@ class SignalGenerator(FormUI, WindowUI):
         if self.input_npoints_obj:
             npoints = self.input_npoints_obj.output_npoints()
         else:
-            npoints = self.npoints
+            npoints = 10000
         if npoints != self.npoints:
             self.npoints = npoints
 

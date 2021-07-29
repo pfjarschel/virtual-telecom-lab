@@ -107,9 +107,9 @@ class PRBSGenerator(FormUI, WindowUI):
     def syncDialsSpins(self):
         # Sync spin boxes values to dials and sliders values
         self.fmultSpin.setValue(self.fmultDial.value()/100.0)
-        self.amultSpin.setValue(self.amultDial.value()/10.0)
-        self.offsetSpin.setValue(self.offsetSlider.value()/10.0)
-        self.phaseSpin.setValue(self.phaseSlider.value()/10.0)
+        self.amultSpin.setValue(self.amultDial.value()/100.0)
+        self.offsetSpin.setValue(self.offsetSlider.value()/1000.0)
+        self.phaseSpin.setValue(self.phaseSlider.value()/100.0)
 
     def setParameters(self):
         # Set Frequency
@@ -148,9 +148,9 @@ class PRBSGenerator(FormUI, WindowUI):
 
         # Adjust dials/sliders positions and limited values
         self.fmultDial.setValue(self.fmultSpin.value()*100.0)
-        self.amultDial.setValue(self.amultSpin.value()*10.0)
-        self.offsetSlider.setValue(self.offsetSpin.value()*10.0)
-        self.phaseSlider.setValue(self.phaseSpin.value()*10.0)
+        self.amultDial.setValue(self.amultSpin.value()*100.0)
+        self.offsetSlider.setValue(self.offsetSpin.value()*1000.0)
+        self.phaseSlider.setValue(self.phaseSpin.value()*100.0)
 
     def setBitLevels(self):
         if self.levelsSpin.value() % 2 and False:  # Disable even number of bits for now

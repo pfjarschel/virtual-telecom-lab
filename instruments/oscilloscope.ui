@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>979</width>
-    <height>491</height>
+    <height>502</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -190,16 +190,16 @@
              </size>
             </property>
             <property name="minimum">
-             <number>-1000</number>
+             <number>-10000</number>
             </property>
             <property name="maximum">
-             <number>1000</number>
+             <number>10000</number>
             </property>
             <property name="singleStep">
-             <number>10</number>
+             <number>100</number>
             </property>
             <property name="pageStep">
-             <number>100</number>
+             <number>1000</number>
             </property>
             <property name="notchTarget">
              <double>10.000000000000000</double>
@@ -480,10 +480,16 @@
              </size>
             </property>
             <property name="minimum">
-             <number>-1000</number>
+             <number>-100000</number>
             </property>
             <property name="maximum">
-             <number>1000</number>
+             <number>100000</number>
+            </property>
+            <property name="singleStep">
+             <number>10</number>
+            </property>
+            <property name="pageStep">
+             <number>100</number>
             </property>
            </widget>
           </item>
@@ -586,6 +592,9 @@
               <property name="keyboardTracking">
                <bool>false</bool>
               </property>
+              <property name="decimals">
+               <number>3</number>
+              </property>
               <property name="minimum">
                <double>-100.000000000000000</double>
               </property>
@@ -593,7 +602,7 @@
                <double>100.000000000000000</double>
               </property>
               <property name="singleStep">
-               <double>0.100000000000000</double>
+               <double>0.010000000000000</double>
               </property>
              </widget>
             </item>
@@ -694,10 +703,16 @@
              </size>
             </property>
             <property name="minimum">
-             <number>-1000</number>
+             <number>-10000</number>
             </property>
             <property name="maximum">
-             <number>1000</number>
+             <number>10000</number>
+            </property>
+            <property name="singleStep">
+             <number>10</number>
+            </property>
+            <property name="pageStep">
+             <number>100</number>
             </property>
            </widget>
           </item>
@@ -778,6 +793,9 @@
               <property name="keyboardTracking">
                <bool>false</bool>
               </property>
+              <property name="decimals">
+               <number>3</number>
+              </property>
               <property name="minimum">
                <double>-100.000000000000000</double>
               </property>
@@ -785,7 +803,7 @@
                <double>100.000000000000000</double>
               </property>
               <property name="singleStep">
-               <double>0.100000000000000</double>
+               <double>0.010000000000000</double>
               </property>
              </widget>
             </item>
@@ -807,10 +825,16 @@
              </size>
             </property>
             <property name="minimum">
-             <number>-1000</number>
+             <number>-100000</number>
             </property>
             <property name="maximum">
-             <number>1000</number>
+             <number>100000</number>
+            </property>
+            <property name="singleStep">
+             <number>10</number>
+            </property>
+            <property name="pageStep">
+             <number>100</number>
             </property>
            </widget>
           </item>
@@ -913,6 +937,9 @@
               <property name="keyboardTracking">
                <bool>false</bool>
               </property>
+              <property name="decimals">
+               <number>3</number>
+              </property>
               <property name="minimum">
                <double>-100.000000000000000</double>
               </property>
@@ -920,7 +947,10 @@
                <double>100.000000000000000</double>
               </property>
               <property name="singleStep">
-               <double>0.100000000000000</double>
+               <double>0.010000000000000</double>
+              </property>
+              <property name="value">
+               <double>0.000000000000000</double>
               </property>
              </widget>
             </item>
@@ -1005,10 +1035,16 @@
              </size>
             </property>
             <property name="minimum">
-             <number>-1000</number>
+             <number>-10000</number>
             </property>
             <property name="maximum">
-             <number>1000</number>
+             <number>10000</number>
+            </property>
+            <property name="singleStep">
+             <number>10</number>
+            </property>
+            <property name="pageStep">
+             <number>100</number>
             </property>
             <property name="notchTarget">
              <double>100.000000000000000</double>
@@ -1135,6 +1171,9 @@
               <property name="keyboardTracking">
                <bool>false</bool>
               </property>
+              <property name="decimals">
+               <number>3</number>
+              </property>
               <property name="minimum">
                <double>-100.000000000000000</double>
               </property>
@@ -1142,7 +1181,7 @@
                <double>100.000000000000000</double>
               </property>
               <property name="singleStep">
-               <double>0.100000000000000</double>
+               <double>0.010000000000000</double>
               </property>
              </widget>
             </item>
