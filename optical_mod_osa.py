@@ -15,7 +15,7 @@ if __name__ == "__main__":
     
     # Create components
     eo_am = eo_amodulator.EOAM()
-    fiber1 = fiber.Fiber(length=10.0)
+    fiber1 = fiber.Fiber(length=10.0)  # km
     
     # Connect parameters, instruments, and components
     # The modulator gets the laser and signal generator outputs

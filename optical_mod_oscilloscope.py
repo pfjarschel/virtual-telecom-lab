@@ -15,8 +15,8 @@ if __name__ == "__main__":
     
     # Create components
     eo_am = eo_amodulator.EOAM()
-    fiber1 = fiber.Fiber(length=10.0)
-    pd1 = photodetector.Photodetector(material=photodetector.GE)
+    fiber1 = fiber.Fiber(length=10.0)  # km
+    pd1 = photodetector.Photodetector(material=photodetector.GE)  # GE, INGAAS, SI
 
     # Connect parameters, instruments, and components
     # The modulator gets the laser and signal generator outputs

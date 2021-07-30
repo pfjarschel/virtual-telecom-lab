@@ -23,11 +23,12 @@ class Fiber():
 
 
     # Default functions
-    def __init__(self, length=1.0):    
+    def __init__(self, length=1.0, loss=0.35):    
         print("Initializing fiber")
         self.t0 = time.time()
         self.tref = self.t0
         self.length = length
+        self.att = loss
 
     def __del__(self):
         print("Deleting fiber object")

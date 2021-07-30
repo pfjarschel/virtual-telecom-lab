@@ -15,10 +15,10 @@ if __name__ == "__main__":
     
     # Create components
     eo_qam = eo_qamodulator.EOQAM()
-    fiber1 = fiber.Fiber(length=10.0)
+    fiber1 = fiber.Fiber(length=10.0)  # km
     fiber2 = fiber.Fiber(length=10.0)  # Actually the same fiber, but we need two inputs/outputs
-    pd1 = photodetector.Photodetector(material=photodetector.GE)
-    pd2 = photodetector.Photodetector(material=photodetector.GE)
+    pd1 = photodetector.Photodetector(material=photodetector.GE)  # GE, INGAAS, SI
+    pd2 = photodetector.Photodetector(material=photodetector.GE)  # GE, INGAAS, SI
 
     # Connect parameters, instruments, and components
     # The modulator gets the laser and signal generator outputs
