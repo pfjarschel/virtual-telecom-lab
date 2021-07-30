@@ -42,6 +42,8 @@ class OTDR(FormUI, WindowUI):
     # Data holders
     fiber_z = np.linspace(0, stopkm, npoints)
     refl_pwr = np.zeros([npoints])
+    events = []
+
 
     # Input objs
     input_fiber = None
@@ -138,12 +140,22 @@ class OTDR(FormUI, WindowUI):
         self.refl_pwr = self.refl_pwr + np.random.uniform(-0.03, 0.03, self.npoints)
 
         # Add random events
-        n = np.random.randint(1, 10)
-        for i in range(n):
-            amp = np.random.uniform(-5, 3)
-            loc = np.random.randint(10, self.npoints)
+        if len(self.events) < 1:
+            print("asdfsdf")
+            n = np.random.randint(1, 20)
+            self.events = np.zeros([2, n])
+            for i in range(n):
+                amp = np.random.uniform(-5, 3)
+                loc_z = np.random.uniform(0.1, self.real_length)
+                self.events[0][i] = loc_z
+                self.events[1][i] = amp
+            
+        for i in range(len(self.events[0])):
+            loc_z = self.events[0][i]
+            amp = self.events[1][i]
+            loc = np.abs(self.fiber_z - loc_z).argmin()
             if amp < 0 and loc < end_i:
-                self.refl_pwr[loc:] = self.refl_pwr[loc:] + amp
+                    self.refl_pwr[loc:] = self.refl_pwr[loc:] + amp
             else:
                 self.refl_pwr[loc] += amp
                 self.refl_pwr[loc + 1] = self.refl_pwr[loc - 1]
